@@ -1,0 +1,44 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+CONF_D=/usr/local/etc/nginx/conf.d
+E_BADARG=10
+E_OK=0
+
+if [ ! -d $CONF_D ]; then
+  mkdir -p "$CONF_D"
+fi
+
+if [ $# -ne 1 ]; then
+  echo "expecting only the directory name"
+  exit $E_BADARG
+fi
+
+target_dir="$1"
+if [ $target_dir == "." ]; then
+  target_dir=`pwd`
+fi
+
+if [ ! -d "$target_dir" ]; then
+  echo "directory \"$target_dir\" does not exist"
+  exit $E_BADARG
+fi
+
+dirname=`basename $target_dir`
+outfile="$CONF_D/$dirname.conf"
+
+if [ -e $outfile ]; then
+  echo "\"$outfile\" already exists"
+  exit $E_BADARG 
+fi
+
+cat <<EOT >$outfile
+location /$dirname {                                                                                          
+  alias  $target_dir/; 
+  index  index.html;              
+}   
+EOT
+
+$DIR/reload-nginx
+echo "Configuration \"$outfile\" created and reloaded nginx"
+exit $E_OK

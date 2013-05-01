@@ -1,0 +1,5 @@
+*.un~
+*~
+.*.s[a-w][a-z]
+.netrwhist
+Session.vim
